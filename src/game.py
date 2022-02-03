@@ -137,6 +137,7 @@ class Tetris:
 
     def update_ghost(self):
         m_y = 0
+        self.ghost_piece.type = self.curr_tetromino.type
         self.ghost_piece.y = self.curr_tetromino.y
 
         for (sy, sx) in self.curr_tetromino.get():
@@ -201,6 +202,7 @@ class Tetris:
         self.curr_tetromino.x = 3
         self.curr_tetromino.y = 0
         self.S.update_hold(self.held_tetromino)
+        self.update_ghost()
 
     def set_state(self, new_state):
         self.state = new_state
