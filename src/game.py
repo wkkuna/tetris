@@ -5,6 +5,7 @@ import src.theme as T
 from pygame.locals import *
 from src.menu import *
 from src.screen import *
+from copy import copy
 
 
 class Tetromino:
@@ -61,6 +62,13 @@ class Tetromino:
         self.theme = theme
         self.color = theme.get_color(self.type)
 
+    def __copy__(self):
+        T = Tetromino(self.x, self.y, self.theme)
+        T.type = self.type
+        T.rotation = self.rotation
+        T.color = self.color
+        return T
+
     def rotate_left(self):
         self.rotation = (self.rotation - 1) % len(self.tetrominos[self.type])
 
@@ -110,7 +118,7 @@ class Tetris:
         self.width = width
         self.height = height
         for i in range(0, 3):
-            self.queue.append(Tetromino(0, 0, self.theme))
+            self.queue.append(Tetromino(3, 0, self.theme))
 
         self.new_tetromino()
         self.clock = pygame.time.Clock()
@@ -118,14 +126,8 @@ class Tetris:
     def new_tetromino(self):
         self.curr_tetromino = self.queue[0]
         self.queue.remove(self.curr_tetromino)
-        self.curr_tetromino.x = 3
-        self.curr_tetromino.y = 0
-        self.queue.append(Tetromino(0, 0, self.theme))
+        self.queue.append(Tetromino(3, 0, self.theme))
         self.S.update_queue(self.queue)
-        self.ghost_piece = Tetromino(
-            self.curr_tetromino.x, self.curr_tetromino.y, self.theme)
-        self.ghost_piece.type = self.curr_tetromino.type
-        self.ghost_piece.color = (211, 211, 211)
         self.update_ghost()
 
     def allowed_layout(self, t):
@@ -137,17 +139,14 @@ class Tetris:
 
     def update_ghost(self):
         m_y = 0
-        self.ghost_piece.type = self.curr_tetromino.type
-        self.ghost_piece.y = self.curr_tetromino.y
+        self.ghost_piece = copy(self.curr_tetromino)
+        self.ghost_piece.color = (211, 211, 211)
 
         for (sy, sx) in self.curr_tetromino.get():
             m_y = max(m_y, sy + self.curr_tetromino.y)
-
-        for (sy, sx) in self.ghost_piece.get():
             if m_y + sy >= self.S.game.height:
                 my_y = self.S.game.height - sy
 
-        self.ghost_piece.x = self.curr_tetromino.x
         while self.allowed_layout(self.ghost_piece):
             self.ghost_piece.y += 1
         self.ghost_piece.y -= 1
@@ -159,7 +158,8 @@ class Tetris:
         updated = self.S.try_update(self.curr_tetromino)
         self.count_lines()
         if not updated:
-            self.state = "over"
+            self.state = "initial"
+            self.main_menu()
         self.new_tetromino()
 
     def move(self, direction):
@@ -177,7 +177,6 @@ class Tetris:
             self.curr_tetromino.y -= y
             if lock:
                 self.lock()
-        self.ghost_piece.x = self.curr_tetromino.x
         self.update_ghost()
 
     # Quickly drop tetromino
@@ -212,7 +211,6 @@ class Tetris:
         if not self.allowed_layout(self.curr_tetromino):
             if not self.S.try_shift(self.curr_tetromino):
                 self.curr_tetromino.rotate_left()
-        self.ghost_piece.rotation = self.curr_tetromino.rotation
         self.update_ghost()
 
     def draw_game(self):
@@ -232,7 +230,7 @@ class Tetris:
         self.S.game.clear()
 
         for i in range(0, 3):
-            self.queue.append(Tetromino(0, 0, self.theme))
+            self.queue.append(Tetromino(3, 0, self.theme))
 
         self.new_tetromino()
 
