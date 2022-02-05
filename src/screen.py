@@ -89,7 +89,10 @@ class Screen:
     queue = []
     window = None
 
-    def __init__(self, width, height, block_size):
+    def __init__(self, width, height, block_size, theme):
+        self.width = width
+        self.height = height
+        self.theme = theme
         self.window = pygame.display.set_mode((width, height))
         self.block_size = block_size
 
@@ -182,11 +185,33 @@ class Screen:
         self.queue.draw(self.window, 1)
         self.hold.draw(self.window, 1)
         pygame.display.set_caption("Tetris")
-        score = pygame.font.SysFont("Helvetica", 20)
-        score_txt = score.render(
-            "Score: " + str(s), True, T.Color().get("black"))
-        self.window.blit(score_txt, (self.block_size, self.block_size))
-        lvl = pygame.font.SysFont("Helvetica", 20)
-        lvl_txt = lvl.render(
-            "Level: " + str(level), True, T.Color().get("black"))
-        self.window.blit(lvl_txt, (self.block_size, self.block_size * 2))
+
+        self.draw_text("Score: " + str(s), T.Color().get("black"),
+                       20, (self.block_size, self.block_size))
+        self.draw_text("Level: " + str(level), T.Color().get("black"),
+                       20, (self.block_size, self.block_size * 2))
+
+    def draw_menu(self, select, state):
+        s = pygame.Surface((self.width, self.height))
+        s.set_alpha(10)
+        s.fill(T.Color().get("blue"))
+        self.window.blit(s, (0, 0))
+
+        for i, opt in enumerate(select.options.values()):
+            color = select.getTextColor(opt)
+            if state == "initial" and opt == "resume":
+                color = T.Color().get("grey")
+
+            text = self.theme.text_format(select.getText(opt), 75, color, True)
+            rect = text.get_rect()
+            self.window.blit(text, (self.width/2 - (rect[2]/2), 300 + i*100))
+
+        title = self.theme.text_format(
+            "Tetris", 90, T.Color().get("yellow"), True)
+        rect = title.get_rect()
+        self.window.blit(title, (self.width/2 - (rect[2]/2), 80))
+        pygame.display.update()
+
+    def draw_text(self, text, color, size, coordiantes):
+        t = self.theme.text_format(text, size, color, False)
+        self.window.blit(t, coordiantes)

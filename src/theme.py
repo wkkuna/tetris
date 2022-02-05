@@ -43,7 +43,7 @@ class Theme:
     def get_font(self):
         return self.font
 
-    def text_format(self, message, textSize, textColor):
-        newFont = pygame.font.SysFont(self.font, textSize, bold=True)
+    def text_format(self, message, textSize, textColor, bold):
+        newFont = pygame.font.SysFont(self.font, textSize, bold)
         newText = newFont.render(message, True, textColor)
         return newText

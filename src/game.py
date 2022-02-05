@@ -1,11 +1,11 @@
 import pygame
 import math
-import random
 import time
-import src.theme as T
 from pygame.locals import *
 from src.menu import *
 from src.screen import *
+from src.tetronimo import *
+import src.theme as T
 from copy import copy
 
 
@@ -14,80 +14,6 @@ class Level:
         if score == 0:
             return 1
         return int(math.log(score, 2) + 1)
-
-
-class Tetromino:
-    # The Tetronimos and their rotations are described as
-    # coordiantes of 1x1 squares they're made of on 4x4 square
-    tetrominos = [
-        # "I"
-        [
-            [(0, 1), (1, 1), (2, 1), (3, 1)],
-            [(0, 0), (0, 1), (0, 2), (0, 3)]
-        ],
-        # "Z"
-        [
-            [(0, 0), (0, 1), (1, 1), (1, 2)],
-            [(0, 1), (1, 1), (1, 0), (2, 0)]
-        ],
-        # "S"
-        [
-            [(0, 1), (0, 2), (1, 0), (1, 1)],
-            [(0, 0), (1, 0), (1, 1), (2, 1)]
-        ],
-        # "J"
-        [
-            [(0, 1), (0, 2), (1, 1), (2, 1)],
-            [(0, 0), (0, 1), (0, 2), (1, 2)],
-            [(0, 1), (1, 1), (2, 1), (2, 0)],
-            [(0, 0), (1, 0), (1, 1), (1, 2)]
-        ],
-        # "L"
-        [
-            [(0, 0), (0, 1), (1, 1), (2, 1)],
-            [(0, 2), (1, 0), (1, 1), (1, 2)],
-            [(0, 0), (1, 0), (2, 0), (2, 1)],
-            [(0, 0), (0, 1), (0, 2), (1, 0)]
-        ],
-        # "T"
-        [
-            [(0, 0), (0, 1), (0, 2), (1, 1)],
-            [(0, 1), (1, 0), (1, 1), (2, 1)],
-            [(0, 1), (1, 0), (1, 1), (1, 2)],
-            [(0, 0), (1, 0), (1, 1), (2, 0)],
-        ],
-        # "O"
-        [
-            [(0, 0), (0, 1), (1, 0), (1, 1)]
-        ],
-    ]
-
-    def __init__(self, x, y, theme):
-        self.x = x
-        self.y = y
-        self.type = random.randint(0, len(self.tetrominos) - 1)
-        self.rotation = 0
-        self.theme = theme
-        self.color = theme.get_color(self.type)
-
-    def __copy__(self):
-        T = Tetromino(self.x, self.y, self.theme)
-        T.type = self.type
-        T.rotation = self.rotation
-        T.color = self.color
-        return T
-
-    def rotate_left(self):
-        self.rotation = (self.rotation - 1) % len(self.tetrominos[self.type])
-
-    def rotate_right(self):
-        self.rotation = (self.rotation + 1) % len(self.tetrominos[self.type])
-
-    def shift(self, dx):
-        self.x += dx
-
-    def get(self):
-        return self.tetrominos[self.type][self.rotation]
 
 
 class Tetris:
@@ -122,9 +48,7 @@ class Tetris:
         self.menu = Menu(options)
         self.theme = T.Theme(colors, "Helvetica")
         self.block_size = 40
-        self.S = Screen(width, height, self.block_size)
-        self.width = width
-        self.height = height
+        self.S = Screen(width, height, self.block_size, self.theme)
         for i in range(0, 3):
             self.queue.append(Tetromino(3, 0, self.theme))
 
@@ -165,7 +89,11 @@ class Tetris:
 
     def levelup(self):
         self.level += 1
-        self.speed -= 2
+
+        if self.speed < 25:
+            self.speed = max(self.speed - 2, 2)
+        else:
+            self.speed = max(self.speed - 5, 2)
 
     def count_lines(self):
         self.score += (self.S.clear_lines() ** 2) * self.level
@@ -287,27 +215,7 @@ class Tetris:
                         self.reset()
                         return
 
-            # Main Menu UI
-            s = pygame.Surface((self.width, self.height))
-            s.set_alpha(10)
-            s.fill(T.Color().get("blue"))
-            self.S.window.blit(s, (0, 0))
-
-            for i, opt in enumerate(self.menu.options.values()):
-                color = select.getTextColor(opt)
-                if self.state == "initial" and opt == "resume":
-                    color = T.Color().get("grey")
-                text = self.theme.text_format(select.getText(opt), 75, color)
-                rect = text.get_rect()
-                self.S.window.blit(
-                    text,  (self.width/2 - (rect[2]/2), 300 + i*100))
-
-            title = self.theme.text_format(
-                "Tetris", 90, T.Color().get("yellow"))
-            title_rect = title.get_rect()
-            self.S.window.blit(title, (self.width/2 - (title_rect[2]/2), 80))
-
-            pygame.display.update()
+            self.S.draw_menu(select, self.state)
             self.clock.tick(self.fps)
 
     def run(self):
