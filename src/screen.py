@@ -174,7 +174,7 @@ class Screen:
             return True
         return False
 
-    def draw(self, tet, ghost_tet, s):
+    def draw(self, tet, ghost_tet, s, level):
         self.window.fill(T.Color().get("white"))
         self.game.draw(self.window)
         self.game.draw_tetronimo(self.window, ghost_tet)
@@ -182,7 +182,11 @@ class Screen:
         self.queue.draw(self.window, 1)
         self.hold.draw(self.window, 1)
         pygame.display.set_caption("Tetris")
-        score = pygame.font.SysFont("Helvetica", 25)
+        score = pygame.font.SysFont("Helvetica", 20)
         score_txt = score.render(
             "Score: " + str(s), True, T.Color().get("black"))
         self.window.blit(score_txt, (self.block_size, self.block_size))
+        lvl = pygame.font.SysFont("Helvetica", 20)
+        lvl_txt = lvl.render(
+            "Level: " + str(level), True, T.Color().get("black"))
+        self.window.blit(lvl_txt, (self.block_size, self.block_size * 2))

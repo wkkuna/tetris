@@ -1,4 +1,5 @@
 import pygame
+import math
 import random
 import time
 import src.theme as T
@@ -6,6 +7,13 @@ from pygame.locals import *
 from src.menu import *
 from src.screen import *
 from copy import copy
+
+
+class Level:
+    def get(self, score):
+        if score == 0:
+            return 1
+        return int(math.log(score, 2) + 1)
 
 
 class Tetromino:
@@ -83,7 +91,7 @@ class Tetromino:
 
 
 class Tetris:
-    level = 0
+    level = 1
     speed = 50
     score = 0
     state = "initial"
@@ -93,7 +101,7 @@ class Tetris:
     ghost_piece = None
     queue = []
     clock = None
-    fps = 30
+    fps = 25
 
     def __init__(self, width, height, theme=0):
         pygame.init()
@@ -129,6 +137,8 @@ class Tetris:
         self.queue.append(Tetromino(3, 0, self.theme))
         self.S.update_queue(self.queue)
         self.update_ghost()
+        if not self.allowed_layout(self.curr_tetromino):
+            self.gameover()
 
     def allowed_layout(self, t):
         squares = t.get()
@@ -151,15 +161,22 @@ class Tetris:
             self.ghost_piece.y += 1
         self.ghost_piece.y -= 1
 
+        self.ghost_piece.y = max(self.ghost_piece.y, 0)
+
+    def levelup(self):
+        self.level += 1
+        self.speed -= 2
+
     def count_lines(self):
-        self.score += self.S.clear_lines()
+        self.score += (self.S.clear_lines() ** 2) * self.level
+        if self.level != Level().get(self.score):
+            self.levelup()
 
     def lock(self):
         updated = self.S.try_update(self.curr_tetromino)
         self.count_lines()
         if not updated:
-            self.state = "initial"
-            self.main_menu()
+            self.gameover()
         self.new_tetromino()
 
     def move(self, direction):
@@ -214,10 +231,15 @@ class Tetris:
         self.update_ghost()
 
     def draw_game(self):
-        self.S.draw(self.curr_tetromino, self.ghost_piece, self.score)
+        self.S.draw(self.curr_tetromino, self.ghost_piece,
+                    self.score, self.level)
+
+    def gameover(self):
+        self.set_state("initial")
+        self.main_menu()
 
     def reset(self):
-        self.level = 0
+        self.level = 1
         self.score = 0
         self.state = "initial"
         self.curr_tetromino = None
@@ -327,7 +349,7 @@ class Tetris:
                         self.set_state("pause")
                         self.main_menu()
 
-            if loop == self.speed:
+            if loop >= self.speed:
                 self.move("down")
                 loop = 0
             loop += 1
