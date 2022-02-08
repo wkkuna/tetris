@@ -31,22 +31,13 @@ class Tetris:
 
     def __init__(self, width, height, theme=0):
         pygame.init()
-        colors = {
-            0: "yellow",
-            1: "orange",
-            2: "rose",
-            3: "pink2",
-            4: "purple",
-            5: "blue2",
-            6: "green"
-        }
         options = {
             0: "new game",
             1: "resume",
             2: "quit"
         }
         self.menu = Menu(options)
-        self.theme = T.Theme(colors, "Helvetica")
+        self.theme = T.Theme("Helvetica", theme)
         self.block_size = 40
         self.S = Screen(width, height, self.block_size, self.theme)
         for i in range(0, 3):
@@ -74,7 +65,7 @@ class Tetris:
     def update_ghost(self):
         m_y = 0
         self.ghost_piece = copy(self.curr_tetromino)
-        self.ghost_piece.color = (211, 211, 211)
+        self.ghost_piece.color = self.theme.get_tet_color(7)
 
         for (sy, sx) in self.curr_tetromino.get():
             m_y = max(m_y, sy + self.curr_tetromino.y)
@@ -87,18 +78,19 @@ class Tetris:
 
         self.ghost_piece.y = max(self.ghost_piece.y, 0)
 
-    def levelup(self):
-        self.level += 1
-
+    def levelup(self, level):
+        diff = level - self.level
         if self.speed < 25:
-            self.speed = max(self.speed - 2, 2)
+            self.speed = max(self.speed - 2*diff, 2)
         else:
-            self.speed = max(self.speed - 5, 2)
+            self.speed = max(self.speed - 5*diff, 2)
+        self.level = level
 
     def count_lines(self):
         self.score += (self.S.clear_lines() ** 2) * self.level
-        if self.level != Level().get(self.score):
-            self.levelup()
+        new_level = Level().get(self.score)
+        if self.level != new_level:
+            self.levelup(new_level)
 
     def lock(self):
         updated = self.S.try_update(self.curr_tetromino)
@@ -224,7 +216,7 @@ class Tetris:
 
         self.clock
         last_time = 0
-        interval = 65
+        interval = 67
         loop = 0
 
         self.main_menu()
@@ -240,7 +232,6 @@ class Tetris:
                     self.move("left")
                 if keys[pygame.K_RIGHT]:
                     self.move("right")
-
                 last_time = current_milli_time()
 
             for event in pygame.event.get():

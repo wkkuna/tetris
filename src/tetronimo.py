@@ -1,4 +1,6 @@
 import random
+
+
 class Tetromino:
     # The Tetronimos and their rotations are described as
     # coordiantes of 1x1 squares they're made of on 4x4 square
@@ -51,7 +53,7 @@ class Tetromino:
         self.type = random.randint(0, len(self.tetrominos) - 1)
         self.rotation = 0
         self.theme = theme
-        self.color = theme.get_color(self.type)
+        self.color = theme.get_tet_color(self.type)
 
     def __copy__(self):
         T = Tetromino(self.x, self.y, self.theme)

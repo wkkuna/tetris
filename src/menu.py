@@ -19,9 +19,5 @@ class Menu:
     def get(self):
         return self.options[self.selected]
 
-    def getTextColor(self, option):
-        color = "white" if option == self.options[self.selected] else "black"
-        return T.Color().get(color)
-
     def getText(self, option):
         return option.upper()

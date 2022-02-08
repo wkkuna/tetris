@@ -37,15 +37,15 @@ class GridField:
             return False
         return self.field[y][x] == 0
 
-    def draw(self, window, opt=0, bg_c="white", grid_c="grey"):
+    def draw(self, window, opt=0, bg_c=(255, 255, 255), grid_c=(192, 192, 192)):
         y_max = 0
         x_max = 0
         if opt == 1:
             rect = pygame.Rect(self.off_l - self.block_size // 2, self.off_u - self.block_size // 2,
                                self.width_px + self.block_size - self.off_r - self.off_l, self.height_px -
                                self.off_d - self.off_u + self.block_size)
-            pygame.draw.rect(window, T.Color().get(bg_c), rect)
-            pygame.draw.rect(window, T.Color().get(grid_c), rect, 1)
+            pygame.draw.rect(window, bg_c, rect)
+            pygame.draw.rect(window, grid_c, rect, 1)
 
         for y in range(self.off_u, self.height_px - self.off_d, self.block_size):
             for x in range(self.off_l, self.width_px - self.off_r, self.block_size):
@@ -53,7 +53,7 @@ class GridField:
                 yidx = (y - self.off_u) // self.block_size
 
                 if self.is_empty(xidx, yidx):
-                    c = T.Color().get(bg_c)
+                    c = bg_c
                 else:
                     c = self.get_elem(xidx, yidx)
 
@@ -61,7 +61,7 @@ class GridField:
 
                 if self.is_empty(xidx, yidx) and opt == 0 or not self.is_empty(xidx, yidx):
                     pygame.draw.rect(window, c, rect)
-                    pygame.draw.rect(window, T.Color().get(grid_c), rect, 1)
+                    pygame.draw.rect(window, grid_c, rect, 1)
 
     def draw_tetronimo(self, window, tet, grid_c="grey"):
         squares = tet.get()
@@ -178,36 +178,35 @@ class Screen:
         return False
 
     def draw(self, tet, ghost_tet, s, level):
-        self.window.fill(T.Color().get("white"))
-        self.game.draw(self.window)
+        self.window.fill(self.theme.get_bg_color())
+        self.game.draw(self.window, 0, self.theme.get_bg_color())
         self.game.draw_tetronimo(self.window, ghost_tet)
         self.game.draw_tetronimo(self.window, tet)
-        self.queue.draw(self.window, 1)
-        self.hold.draw(self.window, 1)
+        self.queue.draw(self.window, 1, self.theme.get_bg_color())
+        self.hold.draw(self.window, 1, self.theme.get_bg_color())
         pygame.display.set_caption("Tetris")
 
-        self.draw_text("Score: " + str(s), T.Color().get("black"),
+        self.draw_text("Score: " + str(s), self.theme.get_text_color(),
                        20, (self.block_size, self.block_size))
-        self.draw_text("Level: " + str(level), T.Color().get("black"),
+        self.draw_text("Level: " + str(level), self.theme.get_text_color(),
                        20, (self.block_size, self.block_size * 2))
 
     def draw_menu(self, select, state):
         s = pygame.Surface((self.width, self.height))
         s.set_alpha(10)
-        s.fill(T.Color().get("blue"))
+        s.fill(self.theme.get_menu_color())
         self.window.blit(s, (0, 0))
 
         for i, opt in enumerate(select.options.values()):
-            color = select.getTextColor(opt)
-            if state == "initial" and opt == "resume":
-                color = T.Color().get("grey")
+            color = self.theme.get_text_color(
+                select.get() == opt, state == "initial" and opt == "resume")
 
             text = self.theme.text_format(select.getText(opt), 75, color, True)
             rect = text.get_rect()
             self.window.blit(text, (self.width/2 - (rect[2]/2), 300 + i*100))
 
         title = self.theme.text_format(
-            "Tetris", 90, T.Color().get("yellow"), True)
+            "Tetris", 90, T.Color().get("FBF8CC"), True)
         rect = title.get_rect()
         self.window.blit(title, (self.width/2 - (rect[2]/2), 80))
         pygame.display.update()
