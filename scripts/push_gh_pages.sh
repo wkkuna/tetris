@@ -12,7 +12,8 @@ BUILD_DIR="build/"
 HTML_DIR="build/html/"
 
 # Build documentation
-./build-docs.sh
+# ./build-docs.sh
+sphinx-build -M html $DOCS_DIR $BUILD_DIR
 
 # Disable Safe Repository checks
 git config --global --add safe.directory "/github/workspace"
