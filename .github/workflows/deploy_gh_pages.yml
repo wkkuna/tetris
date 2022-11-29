@@ -7,7 +7,6 @@ on:
     paths:
       - 'docs/**'
       - '.github/workflows/deploy_gh_pages.yml'
-  workflow_dispatch:
 
 jobs:
   push_gh-pages:
