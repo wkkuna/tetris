@@ -19,5 +19,5 @@ jobs:
         run: ./scripts/push_gh_pages.sh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_MAIL: ${{ secrets.YOUR_MAIL }}
-          GH_NAME: ${{ github.repository_owner }}
+          GH_MAIL: ${{github.event.pusher.email}}
+          GH_NAME: ${{github.event.pusher.name}}
