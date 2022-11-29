@@ -47,4 +47,4 @@ git config user.email $GH_MAIL
 echo "Pushing to gh-pages"
 git add .
 git commit -m "$message"
-git push origin mastergh-pages
+git push origin gh-pages
