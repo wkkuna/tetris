@@ -2,6 +2,9 @@
 
 if [ -z "$GH_TOKEN" ] || [ -z "$GH_MAIL" ] || [ -z "$GH_NAME" ]; then
   echo "Environment configuration missing, exiting... "
+  echo "Token: $GH_TOKEN"
+  echo "Mail: $GH_MAIL"
+  echo "Name: $GH_NAME"
   exit 1
 fi
 
