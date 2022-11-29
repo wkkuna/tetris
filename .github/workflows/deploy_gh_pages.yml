@@ -2,11 +2,11 @@ name: Push gh-pages
 
 on:
   push:
+    branches:
+      - test-docs
     paths:
       - 'docs/**'
       - '.github/workflows/deploy_gh_pages.yml'
-    branches:
-      - test-docs
   workflow_dispatch:
 
 jobs:
