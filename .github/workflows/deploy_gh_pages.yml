@@ -3,7 +3,7 @@ name: Push gh-pages
 on:
   push:
     branches:
-      - test-docs
+      - 'test-docs'
     paths:
       - 'docs/**'
       - '.github/workflows/deploy_gh_pages.yml'
