@@ -33,7 +33,7 @@ echo $message
 
 # Copy files
 echo "Copying files to gh-pages"
-rsync -av --delete $HTML_DIR $TEMP_DIR/ --exclude .git
+rsync -av $HTML_DIR $TEMP_DIR --exclude .git
 
 # Remove build files
 rm -rdf $BUILD_DIR
@@ -45,7 +45,6 @@ git config user.email $GH_MAIL
 
 # Push to Wiki
 echo "Pushing to gh-pages"
-pushd $TEMP_DIR
 git add .
 git commit -m "$message"
 git push origin mastergh-pages
