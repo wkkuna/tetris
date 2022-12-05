@@ -3,14 +3,27 @@ name: Push gh-pages
 on:
   push:
     branches:
-      - 'test-docs'
+      - "main"
     paths:
       - 'docs/**'
       - '.github/workflows/deploy_gh_pages.yml'
+  pull_request:
+    branches:
+      - "main"
+    paths:
+      - 'docs/**'
+      - '.github/workflows/deploy_gh_pages.yml'
+  workflow_dispatch:
 
 jobs:
   push_gh-pages:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_MAIL: ${{github.event.pusher.email}}
+      GH_NAME: ${{github.event.pusher.name}}
+      DOCS_DIR: "docs"
+      BUILD_DIR: "build"
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -29,9 +42,10 @@ jobs:
           python -m pip install --upgrade pip
           pip3 install -r requirements-dev.txt
 
+      - name: Build documentation
+        run: ./scripts/build-docs.sh
+
       - name: Push documentation
+        # Deploy documentation only when on master
+        if: github.ref == 'refs/heads/main'
         run: ./scripts/push_gh_pages.sh
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_MAIL: ${{github.event.pusher.email}}
-          GH_NAME: ${{github.event.pusher.name}}
